@@ -8,6 +8,6 @@ public class SimpleController {
 
     @GetMapping("/home")
     public String homePage() {
-        return "КотограммПарам";
+        return "КотограммПарамПамПам";
     }
 }
