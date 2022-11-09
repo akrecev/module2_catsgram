@@ -1,52 +1,41 @@
 package ru.yandex.practicum.catsgram.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.catsgram.exceptions.InvalidEmailException;
-import ru.yandex.practicum.catsgram.exceptions.UserAlreadyExistException;
-import ru.yandex.practicum.catsgram.user.User;
+import ru.yandex.practicum.catsgram.service.UserService;
+import ru.yandex.practicum.catsgram.model.User;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
 
-    private final Set<User> users = new HashSet<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService= userService;
+    }
 
     @GetMapping
-    public Set<User> getUsers() {
-        return users;
+    public Collection<User> getUsers() {
+        log.trace("Количество пользователей: {}", userService.findAll().size());
+        return userService.findAll();
     }
 
     @PostMapping
     public User addUser(@RequestBody User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new InvalidEmailException("У нового пользователя не указан email");
-        }
-        for (User currentUser : users) {
-            if (user.equals(currentUser)) {
-                throw new UserAlreadyExistException("Пользователь с таким email уже существует");
-            }
-        }
-        users.add(user);
-        return user;
+        log.trace("Новый пользователь: {}", user);
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User putUser(@RequestBody User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new InvalidEmailException("У пользователя не указан email");
-        }
-        for (User currentUser : users) {
-            if (user.equals(currentUser)) {
-                currentUser.setNickname(user.getNickname());
-                currentUser.setBirthdate(user.getBirthdate());
-                return user;
-            }
-        }
-        users.add(user);
-        return user;
+        log.trace("Обновленный пользователь: {}", user);
+        return userService.updateUser(user);
     }
 
 }
