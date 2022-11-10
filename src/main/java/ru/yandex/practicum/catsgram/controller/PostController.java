@@ -22,9 +22,20 @@ public class PostController {
 
 
     @GetMapping("/posts")
-    public List<Post> findAll() {
-        log.debug("Текущее количество постов: {}", postService.findAll().size());
-        return postService.findAll();
+    public List<Post> findAll(
+            @RequestParam(defaultValue = "asc") String sort, // по умолчанию прямая сортировка, обратная - desc
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        if (!(sort.equals("asc") || sort.equals("desc"))) {
+            throw new IllegalArgumentException("Параметр сортировки должен быть: asc или desc");
+        }
+        if (page < 0 || size <= 0) {
+            throw new IllegalArgumentException();
+        }
+        Integer from = page * size;
+        log.debug("Текущее количество постов: {}", postService.getPosts().size());
+        return postService.findAll(size, sort, from);
     }
 
     @PostMapping(value = "/post")
